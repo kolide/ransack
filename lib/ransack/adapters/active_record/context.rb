@@ -109,7 +109,7 @@ module Ransack
         #
         def join_sources
           base, joins = begin
-            alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(self.klass.connection, @object.table.name, [])
+            alias_tracker = @object.alias_tracker
             constraints   = if ::Gem::Version.new(::ActiveRecord::VERSION::STRING) >= ::Gem::Version.new(Constants::RAILS_6_1)
               @join_dependency.join_constraints(@object.joins_values, alias_tracker, @object.references_values)
             elsif ::Gem::Version.new(::ActiveRecord::VERSION::STRING) >= ::Gem::Version.new(Constants::RAILS_6_0)
@@ -282,7 +282,7 @@ module Ransack
 
           join_list = join_nodes + convert_join_strings_to_ast(relation.table, string_joins)
 
-          alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(self.klass.connection, relation.table.name, join_list)
+          alias_tracker = relation.alias_tracker(join_list)
           join_dependency = if ::Gem::Version.new(::ActiveRecord::VERSION::STRING) >= ::Gem::Version.new(Constants::RAILS_6_0)
             Polyamorous::JoinDependency.new(relation.klass, relation.table, association_joins, Arel::Nodes::OuterJoin)
           else
